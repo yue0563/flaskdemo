@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from datetime import datetime
 from scrapp import scrape_stocks, scrape_pm25
 
@@ -27,8 +27,19 @@ books = {
 
 @app.route("/pm25")
 def get_pm25():
+    print(request.args)
     today = datetime.now()
-    columns, values = scrape_pm25()
+
+    sort = False
+    ascending = True
+
+    # 判斷是否按下排序按鈕
+    if "sort" in request.args:
+        sort = True
+        # 取得select的option
+        ascending = True if request.args.get("sort") == "true" else False
+
+    columns, values = scrape_pm25(sort, ascending)
     data = {
         "columns": columns,
         "values": values,
