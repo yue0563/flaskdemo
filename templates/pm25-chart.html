@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PM25-Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+</head>
+
+<body>
+    <h1>PM2.5圖形繪製</h1>
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script>
+
+        $.ajax(
+            {
+                url: "/pm25-data",
+                type: "GET",
+                dataType: "json",
+                success: (data) => {
+                    console.log(data);
+                    drawChart(Chart1, data["x"], data["y"],)
+                }
+            }
+        );
+
+        $("h1").css("text-align", "center");
+
+        // 基于准备好的dom，初始化echarts实例
+        var Chart1 = echarts.init(document.getElementById('main'));
+
+        function drawChart(chart, xdata, ydata, title = "圖表", name = "數值") {
+
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: title
+                },
+                tooltip: {},
+                legend: {
+                    data: [name]
+                },
+                xAxis: {
+                    data: xdata
+                },
+                yAxis: {},
+                series: [
+                    {
+                        name: name,
+                        type: 'bar',
+                        data: ydata
+                    }
+                ]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            Chart.setOption(option);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from datetime import datetime
-from scrapp import scrape_stocks, scrape_pm25
+from scrapp import scrape_stocks, scrape_pm25, get_pm25_json
+import json
 
 # print(__name__)
 
@@ -25,9 +26,24 @@ books = {
 }
 
 
+@app.route("/pm25-chart")
+def pm25_chart():
+    return render_template("pm25-chart.html")
+
+
+@app.route("/pm25-data")
+def pm25_data():
+    try:
+        json_data = get_pm25_json()
+        return json.dumps(json_data, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+        return json.dumps({"result": "failure", "exception": str(e)})
+
+
 @app.route("/pm25", methods=["GET", "POST"])
 def get_pm25():
-    # GET
+    # Git
     print(request.args)
     # POST
     print(request.form)
