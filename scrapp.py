@@ -6,12 +6,20 @@ url = "https://data.moenv.gov.tw/api/v2/aqx_p_02?api_key=e8dd42e6-9b8b-43f8-991e
 
 
 def get_pm25_json():
+    columns, values = scrape_six_pm25()
+
+    json_data = {"site": columns, "pm25": values}
+
+    return json_data
+
+
+def get_pm25_json():
     columns, values = scrape_pm25()
 
     xdata = [value[0] for value in values]
     ydata = [value[2] for value in values]
 
-    json_data = {"x": xdata, "y": ydata}
+    json_data = {"site": xdata, "pm25": ydata}
 
     return json_data
 
@@ -23,14 +31,39 @@ def convert_value(value):
         return None
 
 
+def get_pm25_data():
+    datas = requests.get(url).json()["records"]
+    df = pd.DataFrame(datas)
+    # 將非正常數值轉換成None
+    df["pm25"] = df["pm25"].apply(convert_value)
+    # 移除有None的數據
+    df = df.dropna()
+
+    return df
+
+
+def scrape_six_pm25():
+    six_countys = ["臺北市", "新北市", "桃園市", "臺中市", "臺南市", "高雄市"]
+    pm25 = []
+    try:
+        df = get_pm25_data
+        for county in six_countys:
+            avg_pm25 = df.groupby("county").get_group(county)["pm25"].mean()
+            pm25.append(round(avg_pm25, 2))
+
+        columns = six_countys
+        values = pm25
+
+        return columns, values
+    except Exception as e:
+        print(e)
+
+    return None, 404
+
+
 def scrape_pm25(sort=False, ascending=True):
     try:
-        datas = requests.get(url).json()["records"]
-        df = pd.DataFrame(datas)
-        # 將非正常數值轉換成None
-        df["pm25"] = df["pm25"].apply(lambda x: eval(x))
-        # 移除有None的數據
-        df = df.dropna()
+        df = get_pm25_data
         if sort:
             df = df.sort_values("pm25", ascending=ascending)
 
@@ -72,4 +105,4 @@ def scrape_stocks():
 
 if __name__ == "__main__":
     # print(scrape_stocks())
-    print(get_pm25_json())
+    print(scrape_six_pm25())
