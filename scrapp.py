@@ -5,9 +5,8 @@ import pandas as pd
 url = "https://data.moenv.gov.tw/api/v2/aqx_p_02?api_key=e8dd42e6-9b8b-43f8-991e-b3dee723a52d&limit=1000&sort=datacreationdate%20desc&format=JSON"
 
 
-def get_pm25_json():
+def get_six_pm25_json():
     columns, values = scrape_six_pm25()
-
     json_data = {"site": columns, "pm25": values}
 
     return json_data
@@ -63,7 +62,7 @@ def scrape_six_pm25():
 
 def scrape_pm25(sort=False, ascending=True):
     try:
-        df = get_pm25_data
+        df = get_pm25_data()
         if sort:
             df = df.sort_values("pm25", ascending=ascending)
 
