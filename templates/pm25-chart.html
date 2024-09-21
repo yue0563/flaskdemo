@@ -7,12 +7,43 @@
     <title>PM25-Chart</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+
+    <style>
+        .higher {
+            background-color: aqua;
+
+        }
+    </style>
 </head>
 
+
+
+
 <body>
+    <a href="/">回首頁</a>
+    <div class="higher">
+        最高:<span id="highestPm25"></span>
+        <span id="highestPm25"></span>
+    </div>
+
+    <div class="lower">
+        最低:<span id="lowestSite"></span>
+        <span id="lowestPm25"></span>
+    </div>
+
+    <a href="">更新數據</a>
     <h1>PM2.5圖形繪製</h1>
-    <div id="main" style="width: 600px;height:400px;"></div>
+    <div id="main" style="width: 1024px;height:400px;"></div>
+    <div id="six" style="width: 100%;height:400px;"></div>
     <script>
+        const Chart1 = echarts.init(document.getElementById("main"));
+        const Chart2 = echarts.init(document.getElementById("six"));
+
+        window.addEventListener("resize", () => {
+            Chart1.resize();
+            Chart2.resize();
+        });
+
 
         $.ajax(
             {
@@ -21,19 +52,32 @@
                 dataType: "json",
                 success: (data) => {
                     console.log(data);
-                    drawChart(Chart1, data["x"], data["y"],)
+                    drawChart(Chart1, data["site"], data["pm25"], title = "全省pm2.5數據", "pm2.5")
+
+                    $("#highestSite").text(data["highest"][0]);
+                    $("#highestPm25").text(data["highest"][1]);
+                    $("#lowestSite").text(data["lowest"][0]);
+                    $("#lowestPm25").text(data["lowest"][1]);
+
                 }
             }
         );
 
-        $("h1").css("text-align", "center");
+        $.ajax(
+            {
+                url: "/six-pm25-data",
+                type: "GET",
+                dataType: "json",
+                success: (data) => {
+                    console.log(data);
+                    drawChart(Chart2, data["site"], data["pm25"],
+                        title = "六都pm2.5數據", "pm2.5", "red")
+                }
+            }
+        );
 
-        // 基于准备好的dom，初始化echarts实例
-        var Chart1 = echarts.init(document.getElementById('main'));
 
-        function drawChart(chart, xdata, ydata, title = "圖表", name = "數值") {
-
-            // 指定图表的配置项和数据
+        function drawChart(chart, xdata, ydata, title = "圖表", name = "數值", color = "blue") {
             var option = {
                 title: {
                     text: title
@@ -50,13 +94,15 @@
                     {
                         name: name,
                         type: 'bar',
-                        data: ydata
+                        data: ydata,
+                        itemStyle: {
+                            color: color
+                        }
                     }
                 ]
             };
 
-            // 使用刚指定的配置项和数据显示图表。
-            Chart.setOption(option);
+            chart.setOption(option);
         }
     </script>
 </body>
